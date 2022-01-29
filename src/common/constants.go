@@ -1,6 +1,6 @@
 package common
 
 const (
-	ContextRoot        = "repoconnector"
-	UrlShowRepoDetails = "showrepodetails"
+	ContextRoot = "versioncontrol-service"
+	Refs        = "refs/heads/"
 )

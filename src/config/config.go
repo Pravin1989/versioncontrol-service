@@ -40,7 +40,7 @@ func loadAppConfig() error {
 }
 
 func loadOAuthServerConfig() error {
-	bytes := []byte(os.Getenv("OAuth_SERVER_PROPERTIES"))
+	bytes := []byte(os.Getenv("OAUTH_SERVER_PROPERTIES"))
 	if err := json.Unmarshal(bytes, &OAuthConfig); err != nil {
 		return err
 	}

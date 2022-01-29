@@ -22,13 +22,12 @@ func Start() {
 	router := loadRoutes()
 	log.Println("Starting REST Server")
 	log.Printf("REST server listening on port %d", config.ServerConfig.Port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", config.ServerConfig.Port), router)
-	log.Println("Server Crashed : ", err)
+	log.Println("Server Crashed : ", http.ListenAndServe(fmt.Sprintf(":%d", config.ServerConfig.Port), router))
 }
 
 //Creates router
 func loadRoutes() *mux.Router {
-	serviceRouter := mux.NewRouter().PathPrefix(fmt.Sprintf("/%s", common.ContextRoot)).Subrouter()
+	serviceRouter := mux.NewRouter().PathPrefix("/" + common.ContextRoot).Subrouter()
 	registerApiRoutes(serviceRouter)
 	return serviceRouter
 }

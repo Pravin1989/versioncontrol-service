@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"log"
 	"strconv"
 	"time"
+	"versioncontrol-service/src/common"
 
 	"github.com/google/go-github/v42/github"
 )
@@ -16,7 +16,7 @@ func ConnectToRepoAndStartOperation(ctx context.Context, client *github.Client) 
 	var versionControl = new(GitVersionControl)
 	versionControl.SourceRepoOwner = "Pravin1989"
 	versionControl.SourceRepoName = "sample-repo"
-	versionControl.CommitBranch = "test5"
+	versionControl.CommitBranch = "test"
 	versionControl.BaseBranch = "main"
 	versionControl.AuthorName = "Pravin"
 	versionControl.AuthorEmail = "Pravin.Budge@gmail.com"
@@ -25,20 +25,20 @@ func ConnectToRepoAndStartOperation(ctx context.Context, client *github.Client) 
 	versionControl.PrDescription = "Please review and approve"
 	ref, err := versionControl.CreateBranch(ctx, client)
 	if err != nil {
-		fmt.Println("Unable to create branch", err)
+		log.Printf("Failed to create branch %s\n", err)
 		return
 	}
 	tree, err := versionControl.GetTree(ctx, client, ref)
 	if err != nil {
-		log.Fatalf("Unable to create the tree based on the provided files: %s\n", err)
+		log.Printf("Failed to create the tree based on the provided files: %s\n", err)
 		return
 	}
 	if pushErr := versionControl.CreateAndPushCommit(ctx, client, ref, tree); pushErr != nil {
-		log.Fatalf("Unable to create the commit and push: %s\n", pushErr)
+		log.Printf("Failed to create the commit and push: %s\n", pushErr)
 		return
 	}
 	if createPRErr := versionControl.CreatePR(ctx, client); createPRErr != nil {
-		log.Fatalf("Unable to create the PR: %s\n", createPRErr)
+		log.Printf("Failed to create the PR: %s\n", createPRErr)
 		return
 	}
 
@@ -59,7 +59,7 @@ func (gv GitVersionControl) CreatePR(ctx context.Context, client *github.Client)
 		return err
 	}
 	gv.PRLink = pr.GetHTMLURL()
-	fmt.Printf("PR created: %s\n", gv.PRLink)
+	log.Printf("PR created: %s\n", gv.PRLink)
 	return nil
 }
 
@@ -88,7 +88,7 @@ func (gv GitVersionControl) CreateAndPushCommit(ctx context.Context, client *git
 	return nil
 }
 
-// This method is used to tree for existing changes
+// This method is used to create tree for existing changes
 func (gv GitVersionControl) GetTree(ctx context.Context, client *github.Client, ref *github.Reference) (*github.Tree, error) {
 	tree, _, err := client.Git.GetTree(ctx, gv.SourceRepoOwner, gv.SourceRepoName, *ref.Object.SHA, true)
 	if err != nil {
@@ -101,7 +101,7 @@ func (gv GitVersionControl) GetTree(ctx context.Context, client *github.Client, 
 			continue
 		}
 		byteArray, _ := base64.StdEncoding.DecodeString(blob.GetContent())
-		changes := string(byteArray) + "\n Update few things with " + strconv.Itoa(i)
+		changes := string(byteArray) + "\n Added one line for testing " + strconv.Itoa(i)
 		entries = append(entries, &github.TreeEntry{Path: value.Path, Type: github.String("blob"), Content: github.String(changes), Mode: github.String("100644")})
 	}
 	tree, _, err = client.Git.CreateTree(ctx, gv.SourceRepoOwner, gv.SourceRepoName, *ref.Object.SHA, entries)
@@ -110,7 +110,7 @@ func (gv GitVersionControl) GetTree(ctx context.Context, client *github.Client, 
 
 // This method is used to create branch
 func (gv GitVersionControl) CreateBranch(ctx context.Context, client *github.Client) (*github.Reference, error) {
-	if ref, _, err := client.Git.GetRef(ctx, gv.SourceRepoOwner, gv.SourceRepoName, "refs/heads/"+gv.CommitBranch); err == nil {
+	if ref, _, err := client.Git.GetRef(ctx, gv.SourceRepoOwner, gv.SourceRepoName, common.Refs+gv.CommitBranch); err == nil {
 		return ref, nil
 	}
 	//If error occured above The branch is not created, need to create it
@@ -118,11 +118,11 @@ func (gv GitVersionControl) CreateBranch(ctx context.Context, client *github.Cli
 		return nil, errors.New("The base branch main is same as commit branch")
 	}
 
-	baseRef, _, baseErr := client.Git.GetRef(ctx, gv.SourceRepoOwner, gv.SourceRepoName, "refs/heads/"+gv.BaseBranch)
+	baseRef, _, baseErr := client.Git.GetRef(ctx, gv.SourceRepoOwner, gv.SourceRepoName, common.Refs+gv.BaseBranch)
 	if baseErr != nil {
 		return nil, baseErr
 	}
-	newRef := &github.Reference{Ref: github.String("refs/heads/" + gv.CommitBranch), Object: &github.GitObject{SHA: baseRef.Object.SHA}}
+	newRef := &github.Reference{Ref: github.String(common.Refs + gv.CommitBranch), Object: &github.GitObject{SHA: baseRef.Object.SHA}}
 	ref, _, err := client.Git.CreateRef(ctx, gv.SourceRepoOwner, gv.SourceRepoName, newRef) //Create Branch
 	if err != nil {
 		return nil, errors.New("Failed to create branch")
