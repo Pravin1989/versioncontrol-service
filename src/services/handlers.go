@@ -55,6 +55,8 @@ func handleLogin(w http.ResponseWriter, r *http.Request, oauthConf *oauth2.Confi
 	log.Println("Redirect to Github for Access Code : ", url)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
+
+//THis method is call back handler for OAuth Autharization
 func HandleCallBackFromGithubAuth(w http.ResponseWriter, r *http.Request) {
 	log.Println("Callback received from Github")
 	code := r.FormValue("code")
@@ -79,6 +81,6 @@ func HandleCallBackFromGithubAuth(w http.ResponseWriter, r *http.Request) {
 
 		client := github.NewClient(tc)
 
-		models.ConnectToRepoAndStartOperation(ctx, client)
+		models.StartProcess(ctx, client)
 	}
 }

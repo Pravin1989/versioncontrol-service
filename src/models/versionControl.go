@@ -22,12 +22,12 @@ type AuthorUser struct {
 }
 
 type PullRequest struct {
-	PRTitle       string `json:"prTitle"`
+	PrTitle       string `json:"prTitle"`
 	PrDescription string `json:"prDescription"`
-	PRLink        string `json:"prLink"`
+	PrLink        string `json:"prLink"`
 }
 
-type VersionControl interface {
+type VersionControlOperations interface {
 	CreateBranch(ctx context.Context, client *github.Client) (*github.Reference, error)
 	CreatePR(ctx context.Context, client *github.Client) error
 	CreateAndPushCommit(ctx context.Context, client *github.Client, ref *github.Reference, tree *github.Tree) error

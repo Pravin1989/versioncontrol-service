@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-github/v42/github"
 )
 
-func ConnectToRepoAndStartOperation(ctx context.Context, client *github.Client) {
+func StartProcess(ctx context.Context, client *github.Client) {
 	var versionControl = new(GitVersionControl)
 	versionControl.SourceRepoOwner = "Pravin1989"
 	versionControl.SourceRepoName = "sample-repo"
@@ -21,7 +21,7 @@ func ConnectToRepoAndStartOperation(ctx context.Context, client *github.Client) 
 	versionControl.AuthorName = "Pravin"
 	versionControl.AuthorEmail = "Pravin.Budge@gmail.com"
 	versionControl.CommitMessage = "This is my new commit for test"
-	versionControl.PRTitle = "PR for new changes"
+	versionControl.PrTitle = "PR for new changes"
 	versionControl.PrDescription = "Please review and approve"
 	ref, err := versionControl.CreateBranch(ctx, client)
 	if err != nil {
@@ -47,7 +47,7 @@ func ConnectToRepoAndStartOperation(ctx context.Context, client *github.Client) 
 // This method is used to create Pull Request
 func (gv GitVersionControl) CreatePR(ctx context.Context, client *github.Client) error {
 	newPR := &github.NewPullRequest{
-		Title:               &gv.PRTitle,
+		Title:               &gv.PrTitle,
 		Head:                &gv.CommitBranch,
 		Base:                &gv.BaseBranch,
 		Body:                &gv.PrDescription,
@@ -58,8 +58,8 @@ func (gv GitVersionControl) CreatePR(ctx context.Context, client *github.Client)
 	if err != nil {
 		return err
 	}
-	gv.PRLink = pr.GetHTMLURL()
-	log.Printf("PR created: %s\n", gv.PRLink)
+	gv.PrLink = pr.GetHTMLURL()
+	log.Printf("PR created: %s\n", gv.PrLink)
 	return nil
 }
 
@@ -125,7 +125,7 @@ func (gv GitVersionControl) CreateBranch(ctx context.Context, client *github.Cli
 	newRef := &github.Reference{Ref: github.String(common.Refs + gv.CommitBranch), Object: &github.GitObject{SHA: baseRef.Object.SHA}}
 	ref, _, err := client.Git.CreateRef(ctx, gv.SourceRepoOwner, gv.SourceRepoName, newRef) //Create Branch
 	if err != nil {
-		return nil, errors.New("Failed to create branch")
+		return nil, err
 	}
 	return ref, nil
 }
