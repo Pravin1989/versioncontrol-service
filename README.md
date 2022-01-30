@@ -28,4 +28,7 @@ $ run the .exe file
 * Endpoint : http://localhost:8080/versioncontrol-service/
 * Http Method : GET
 
-Once you hit the above URL you will be redirected to github login page if you are not already logged in then you need to login and you can see in the console the PR link has been created with some dummy changes in `sample-repo`.
+Once you hit the above URL you will be redirected to github login page if you are not already logged in then you need to login and you can see in the console the PR link has been created with some dummy changes in  [https://github.com/Pravin1989/sample-repo]()
+
+### Architecture
+![Imgae Caption](VersionControl_Arch.svg)
