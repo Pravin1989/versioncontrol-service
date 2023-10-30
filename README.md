@@ -8,7 +8,6 @@ create pull request.
 $ git clone git@github.com:Pravin1989/versioncontrol-service.git
 
 ```
-
 ## Two ways to run it 
 
 ```
